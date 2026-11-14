@@ -1,0 +1,47 @@
+{
+  "name": "dsh-heartbeat",
+  "version": "1.0.0",
+  "description": "Impulse engine for AI companions: tracks needs, decides when the persona wants to speak, and hands that decision to a host app or a JSON file.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Joe-Miller-1314",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Joe-Miller-1314/dsh-heartbeat.git"
+  },
+  "homepage": "https://github.com/Joe-Miller-1314/dsh-heartbeat#readme",
+  "icon": "./icon.svg",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/smoke.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "ai-companion",
+    "proactive",
+    "scheduler"
+  ]
+}

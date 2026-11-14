@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Heartbeat",
+    "description": "Gives a companion persona a slow-burning sense of need, so it decides for itself when to speak — then hands that decision to a host app or a plain JSON file."
+  }
+}
