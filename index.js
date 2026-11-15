@@ -1,4 +1,4 @@
-// dsh-heartbeat — a small impulse engine for AI companions.
+// dsh-companion-heartbeat — a small impulse engine for AI companions.
 //
 // Every few seconds it asks one question: does the persona want to say
 // something right now, and if so how soon may it speak again? The answer is
@@ -21,7 +21,7 @@ import { startPanel } from './lib/panel.js';
 import { createWatch } from './lib/watch.js';
 import { appendLog, ensureDir, readJson, writeJson } from './lib/util.js';
 
-export const name = 'dsh-heartbeat';
+export const name = 'dsh-companion-heartbeat';
 // No hard service dependencies: the decision loop runs in any profile. The
 // optional weekly pass looks up `sessionController` at run time instead, so a
 // profile without it never blocks activation.

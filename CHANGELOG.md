@@ -4,6 +4,15 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-15
+
+### Changed
+
+- Renamed the npm package to `dsh-companion-heartbeat`: `dsh-heartbeat` was
+  already taken on npm by an unrelated scheduling plugin, and a name clash would
+  make the two indistinguishable in the plugin market. The plugin row id stays
+  `heartbeat`, so existing `cordis.patch.yml` configuration keeps working.
+
 ## [1.1.0] - 2026-11-15
 
 ### Added

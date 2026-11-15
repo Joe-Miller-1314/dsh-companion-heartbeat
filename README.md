@@ -1,10 +1,10 @@
-# dsh-heartbeat
+# dsh-companion-heartbeat
 
 A small impulse engine for AI companions, packaged as a [DeepSeek Harness](https://github.com/deepseek-ai) (DSH) plugin.
 
-Repository: <https://github.com/Joe-Miller-1314/dsh-heartbeat> · License: MIT · Node.js 20+
+Repository: <https://github.com/Joe-Miller-1314/dsh-companion-heartbeat> · License: MIT · Node.js 20+
 
-Most companion setups only react: a message arrives, the persona answers. `dsh-heartbeat` gives the persona a slow internal clock instead. Three needs — missing the other person, wanting company, being curious — rise quietly over time, get satisfied when the other person actually writes, and once in a while spike for no reason at all. Every few seconds the plugin asks one question:
+Most companion setups only react: a message arrives, the persona answers. `dsh-companion-heartbeat` gives the persona a slow internal clock instead. Three needs — missing the other person, wanting company, being curious — rise quietly over time, get satisfied when the other person actually writes, and once in a while spike for no reason at all. Every few seconds the plugin asks one question:
 
 > Does the persona want to say something right now, and how soon may it speak again?
 
@@ -42,7 +42,7 @@ Speaking writes `speakIntervalMinutes` (default 2) as the allowed gap; staying q
 
 The package is a DSH bundle: `package.json` declares `dsh.bundle.patch`, and `cordis.patch.yml` inserts one plugin row.
 
-1. Pack it — `npm pack` in this directory produces `dsh-heartbeat-1.0.0.tgz`.
+1. Pack it — `npm pack` in this directory produces `dsh-companion-heartbeat-1.2.0.tgz`.
 2. Install the tarball as a bundle in DSH (Plugin Manager, or the equivalent `install_bundle` action), then enable it.
 
 It also runs as an ordinary ES module — import `apply` and hand it a context with `on` / `effect`, which is what the smoke test does.
@@ -56,7 +56,7 @@ Every path, name and host-app detail is configuration; nothing about a particula
 ```yaml
 - insert:
     - id: heartbeat
-      name: dsh-heartbeat
+      name: dsh-companion-heartbeat
       config:
         persona: 'companion'
         dataDir: '~/.dsh/heartbeat'

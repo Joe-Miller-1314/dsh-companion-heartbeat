@@ -1,15 +1,15 @@
 {
-  "name": "dsh-heartbeat",
-  "version": "1.1.0",
+  "name": "dsh-companion-heartbeat",
+  "version": "1.2.0",
   "description": "Impulse engine for AI companions: tracks needs, decides when the persona wants to speak, and hands that decision to a host app or a JSON file.",
   "type": "module",
   "license": "MIT",
   "author": "Joe-Miller-1314",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Joe-Miller-1314/dsh-heartbeat.git"
+    "url": "git+https://github.com/Joe-Miller-1314/dsh-companion-heartbeat.git"
   },
-  "homepage": "https://github.com/Joe-Miller-1314/dsh-heartbeat#readme",
+  "homepage": "https://github.com/Joe-Miller-1314/dsh-companion-heartbeat#readme",
   "icon": "./icon.svg",
   "engines": {
     "node": ">=20"
