@@ -74,7 +74,9 @@ Every path, name and host-app detail is configuration; nothing about a particula
 | --- | --- | --- |
 | `persona` | `companion` | Display name; used in the consolidation prompt. |
 | `dataDir` | `~/.dsh/heartbeat` | Where state, log, tuning and memories live (`$DSH_HOME` respected). |
-| `chats` | `[]` | Chat keys to track. Empty means "ask the adapter" (the wechatagent adapter reads its whitelist). |
+| `chats` | `[]` | Chat keys to track. Empty means "ask the adapter" (the wechatagent adapter reads its whitelist). A selection saved in the panel is stored in `config.json` and wins from then on. |
+| `panel.enabled` | `true` | Serve the local "who should the persona keep in mind?" page. |
+| `panel.port` | `43110` | Loopback port for that page. The URL with its token is printed in `heartbeat.log`. |
 | `rolePath` | — | Persona markdown file. Gets the `NOW` / `LEARNED` / `WATCHED` blocks. Optional. |
 | `bufferPath` | — | JSON message buffer used to read activity. Optional: without it the persona is simply always idle. |
 | `bufferFormat` | `auto` | `auto` understands `outgoing`, `isSend: 1` and `message_id: "out-…"`. |
@@ -106,6 +108,18 @@ On first run the engine writes its numbers to `<dataDir>/config.json` and re-rea
 
 Lower `threshold` or raise `missRate` for a clingier persona; the opposite for a distant one.
 
+### Choosing who to keep in mind
+
+The plugin serves one local page, bound to `127.0.0.1` and protected by a per-install token:
+
+```text
+http://127.0.0.1:43110/?token=<contents of <dataDir>/panel-token.txt>
+```
+
+It lists every chat the adapter knows about — the host whitelist plus every chat that has messages in the buffer — with the chat's name and how long ago it was active. Tick the ones the heartbeat may reach out to, press **保存**. The selection is written to `<dataDir>/config.json` as `chats`, and the loop follows it on the next tick; nothing restarts and the host config is not touched by hand.
+
+Chat keys may also be typed in by hand (`wechat:private:<id>`, `wechat:group:<id>`), which is useful before the first message exists.
+
 ### Touch files
 
 `<dataDir>/consolidate-now` triggers a memory pass on the next tick; `<dataDir>/watch-now` triggers a video. Both are deleted after use.
@@ -123,8 +137,9 @@ Lower `threshold` or raise `missRate` for a clingier persona; the opposite for a
 ```text
 <dataDir>/
   state.json          needs, per-chat counters, last decision, current scene
-  config.json         live tuning values
+  config.json         live tuning values, and the chat selection saved by the panel
   heartbeat.log       one line per tick, rotated at 512 KiB
+  panel-token.txt     token required by the local settings page
   consolidate.json    last memory pass
   watch.json          seen videos
   proactive.json      json adapter output
@@ -149,7 +164,7 @@ The persona file, when configured, gets three replaceable blocks: `<!-- HEARTBEA
 - **Consolidation needs `sessionController`.** The plugin declares no hard service dependencies (`inject = []`), so it loads in any profile; only the weekly memory pass needs that service. Without it the pass logs `sessionController unavailable` and skips itself, everything else keeps running.
 - **The weekly pass is not per-chat.** It merges everything in the buffer across chats.
 - **Video watching targets bilibili's public web APIs.** Rates, regions and availability can change without notice.
-- **No UI.** State is inspectable as JSON; there is no dashboard.
+- **The UI is one local page, not part of the DSH window.** It is served on loopback so it works with any host app and needs no client build; bookmark it. Where a host app has its own console, that console stays the place to watch conversations.
 
 ## Disclaimer
 

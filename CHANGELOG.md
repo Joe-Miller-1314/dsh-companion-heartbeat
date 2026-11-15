@@ -4,6 +4,23 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-15
+
+### Added
+
+- Local settings page ("who to keep in mind"): lists the adapter's chats and the
+  chats that have messages in the buffer, with names and last activity, lets the
+  user tick the ones the heartbeat may reach out to, and saves the choice to the
+  live tuning file. Bound to `127.0.0.1`, guarded by a per-install token.
+- `panel.enabled` and `panel.port` configuration keys; the page URL is written to
+  `heartbeat.log` and the token to `<dataDir>/panel-token.txt`.
+
+### Changed
+
+- An explicit `chats` list in the tuning file (including an empty one) now wins
+  over the adapter's own guess, so the page's selection takes effect on the next
+  tick without a restart.
+
 ## [1.0.0] - 2026-11-14
 
 First public release. Rewritten from a single-machine private plugin into a

@@ -174,7 +174,10 @@ const at = (hour, minute = 0) => new Date(2026, 0, 5, hour, minute, 0).getTime()
   assert.equal(host.unrelated.keep, true, 'unrelated config must survive');
   assert.equal(host.wechat.token, 'should-survive');
   assert.equal(host.wechat.proactive.enabled, true);
-  assert.equal(host.wechat.proactive.intervalMinutes, 4);
+  // The host validates its own config (30..1440 minutes, idle >= 5), so the
+  // adapter clamps rather than writing a value the host would reject.
+  assert.equal(host.wechat.proactive.intervalMinutes, 30);
+  assert.equal(host.wechat.proactive.idleMinutes, 5);
   assert.equal(host.wechat.proactive.chats['wechat:private:u1'], true);
   console.log('ok adapters');
 }

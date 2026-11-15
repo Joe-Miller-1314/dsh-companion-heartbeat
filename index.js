@@ -17,6 +17,7 @@ import { normaliseTuning, resolveConfig } from './lib/config.js';
 import { createState, plansFrom, tick } from './lib/engine.js';
 import { loadSlots, pickLife, writeLife } from './lib/life.js';
 import { createMemory } from './lib/memory.js';
+import { startPanel } from './lib/panel.js';
 import { createWatch } from './lib/watch.js';
 import { appendLog, ensureDir, readJson, writeJson } from './lib/util.js';
 
@@ -73,7 +74,16 @@ export function apply(ctx, rawConfig = {}) {
     return live && typeof live === 'object' ? normaliseTuning({ ...config.tuning, ...live }) : { ...config.tuning };
   };
 
+  // The panel stores the chosen chats in the tuning file, so an explicit list
+  // (including an empty one) wins over whatever the adapter would guess.
+  const liveChats = () => {
+    const live = readJson(config.tuningPath, null);
+    return Array.isArray(live?.chats) ? live.chats.map(String) : null;
+  };
+
   const resolveKeys = () => {
+    const chosen = liveChats();
+    if (chosen) return chosen;
     if (config.chats.length) return config.chats;
     if (typeof adapter.keys === 'function') {
       try { return adapter.keys(); } catch { return []; }
@@ -199,6 +209,9 @@ export function apply(ctx, rawConfig = {}) {
   first.unref?.();
   timers.push(first);
 
+  const stopPanel = startPanel({ config, log });
+  timers.push(stopPanel);
+
   const dispose = () => {
     for (const timer of timers) {
       clearInterval(timer);
@@ -212,6 +225,6 @@ export function apply(ctx, rawConfig = {}) {
     ctx.on('dispose', dispose);
   }
 
-  log(`heartbeat started (adapter=${adapter.type}, tick=${config.tickSeconds}s, chats=${config.chats.length || 'auto'})`);
+  log(`heartbeat started (adapter=${adapter.type}, tick=${config.tickSeconds}s, chats=${config.chats.length || 'auto'}${config.panelEnabled ? `, panel=127.0.0.1:${config.panelPort}` : ''})`);
   return dispose;
 }
