@@ -80,6 +80,11 @@ window.__ModuleLoader__.load({
       if (state.status === "unreachable") {
         return h("div", { style: { padding: "12px 0" } }, [
           h("p", { key: "m", style: { margin: 0, opacity: 0.8 } }, text.unreachable),
+          h(
+            "p",
+            { key: "d", style: { margin: "6px 0 0", fontSize: 12, opacity: 0.55 } },
+            [state.reason, "origin=" + String(location.origin || "?")].filter(Boolean).join(" · "),
+          ),
           h("button", { key: "r", type: "button", onClick: reload, style: { marginTop: 8 } }, text.retry),
         ]);
       }

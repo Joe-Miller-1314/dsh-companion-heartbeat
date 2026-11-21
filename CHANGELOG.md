@@ -4,6 +4,17 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-11-21
+
+### Fixed
+
+- The local panel answered `Access-Control-Allow-Origin` only for `http://`
+  loopback pages, but the desktop app renders from the `dsh-app://app` scheme, so
+  the in-app list could not read it. That origin is now trusted as well; the
+  standalone page still needs its token.
+- The in-app card shows the fetch error and its own origin when it cannot reach
+  the host, instead of only guessing.
+
 ## [1.4.1] - 2026-11-21
 
 ### Fixed
