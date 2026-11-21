@@ -4,6 +4,20 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-11-21
+
+### Added
+
+- Client half: the "Keep in mind" list now also renders inside DeepSeek Harness,
+  as a card on the plugin's own settings page (`settings.plugin.item` slot). The
+  card reads and writes the same host endpoints as the standalone page.
+
+### Changed
+
+- The local panel accepts requests whose `Origin` is a loopback page, so the GUI
+  can talk to it without reading `panel-token.txt`. The token still guards the
+  standalone URL and keeps other local programs out.
+
 ## [1.2.0] - 2026-11-15
 
 ### Changed

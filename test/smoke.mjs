@@ -234,6 +234,26 @@ const at = (hour, minute = 0) => new Date(2026, 0, 5, hour, minute, 0).getTime()
   console.log('ok integration');
 }
 
+// ------------------------------------------------------------ client half ---
+{
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  const entry = manifest.exports?.['./client'];
+  assert.equal(typeof entry, 'string', 'package.json must export ./client');
+  const clientFile = path.join(root, String(entry).replace(/^\.\//, ''));
+  assert.ok(fs.existsSync(clientFile), `${entry} must exist`);
+  assert.ok(manifest.files?.includes('client'), 'the client directory must ship in the package');
+  assert.equal(manifest.dsh?.client?.platform, 'web', 'the client half targets the web app');
+
+  const source = fs.readFileSync(clientFile, 'utf8');
+  assert.ok(source.includes('window.__ModuleLoader__.load'), 'client must register through the module loader');
+  assert.ok(source.includes('settings.plugin.item'), 'client must render into the plugin settings page');
+  assert.ok(source.includes(manifest.name), 'client module id must match the package name');
+
+  const vm = await import('node:vm');
+  new vm.Script(source, { filename: clientFile });
+  console.log('ok client entry');
+}
+
 // ------------------------------------------------------------ no secrets ---
 {
   // Machine-specific absolute paths must never be committed. Extra private
