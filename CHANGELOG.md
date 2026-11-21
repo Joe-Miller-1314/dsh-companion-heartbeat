@@ -4,6 +4,15 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-11-21
+
+### Fixed
+
+- The client half registered into `settings.plugin.item`, a slot this DSH
+  release does not declare, so nothing showed up in the GUI. It now claims its
+  own page in Settings through `settings.section` (id `companion-heartbeat`),
+  with a localized nav label from the plugin's own dictionary.
+
 ## [1.4.0] - 2026-11-21
 
 ### Added

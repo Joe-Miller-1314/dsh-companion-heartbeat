@@ -1,9 +1,9 @@
 // dsh-companion-heartbeat — client half.
 //
-// Renders the "keep in mind" list inside DeepSeek Harness, as a card on this
-// plugin's own settings page (slot: settings.plugin.item). The list itself is
-// served by the host half over http://127.0.0.1:<panel.port>, which keeps the
-// standalone page working when no GUI is around.
+// Renders the "keep in mind" list inside DeepSeek Harness as its own page in
+// Settings (slot: settings.section, id "companion-heartbeat"). The list itself
+// is served by the host half over http://127.0.0.1:<panel.port>, which keeps
+// the standalone page working when no GUI is around.
 
 window.__ModuleLoader__.load({
   id: "dsh-companion-heartbeat",
@@ -186,17 +186,31 @@ window.__ModuleLoader__.load({
       ]);
     }
 
+    const NS = PLUGIN;
+
     exports.name = PLUGIN;
-    exports.inject = ["slots"];
+    exports.inject = ["slots", "locale"];
     exports.apply = function apply(ctx) {
-      ctx.inject(["settingsScope"], (scoped) => {
-        scoped.slots.inject("settings.plugin.item", () =>
-          scoped.slots.register(
-            { name: "settings.plugin.item", key: PLUGIN, order: 20 },
-            () => h(MindList),
-          ),
-        );
-      });
+      const t = ctx.locale.bind(NS);
+      // Own page in Settings. A section is a nav row plus a panel; the panel is
+      // rendered with `{ only: <id> }`, so the label and the body stay together.
+      ctx.effect(
+        () => ctx.locale.register(NS, { zh: { nav: "惦记名单" }, en: { nav: "Keep in mind" } }),
+        "dsh-companion-heartbeat: settings dictionaries",
+      );
+      ctx.slots.inject("settings.section", () =>
+        ctx.slots.register(
+          {
+            name: "settings.section",
+            id: "companion-heartbeat",
+            order: 45,
+            label: () => t("nav"),
+            locale: NS,
+            inject: () => ({ t }),
+          },
+          (props) => h(MindList, { t: props && props.t }),
+        ),
+      );
     };
     return module.exports;
   },

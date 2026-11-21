@@ -110,7 +110,7 @@ Lower `threshold` or raise `missRate` for a clingier persona; the opposite for a
 
 ### Choosing who to keep in mind
 
-Inside DeepSeek Harness the list lives on this plugin's own settings page (**Settings → Plugins → dsh-companion-heartbeat**), as a "Keep in mind" card. It talks to the host half over loopback, so nothing else has to be opened.
+Inside DeepSeek Harness the list is its own page in Settings (**Settings → Keep in mind**, id `companion-heartbeat`), registered through the `settings.section` slot. It talks to the host half over loopback, so nothing else has to be opened.
 
 Outside the GUI the plugin also serves one local page, bound to `127.0.0.1` and protected by a per-install token:
 

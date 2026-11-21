@@ -316,11 +316,63 @@ const at = (hour, minute = 0) => new Date(2026, 0, 5, hour, minute, 0).getTime()
 
   const source = fs.readFileSync(clientFile, 'utf8');
   assert.ok(source.includes('window.__ModuleLoader__.load'), 'client must register through the module loader');
-  assert.ok(source.includes('settings.plugin.item'), 'client must render into the plugin settings page');
+  assert.ok(source.includes('settings.section'), 'client must render into the settings page');
+  assert.ok(source.includes('companion-heartbeat'), 'client must claim its own settings section id');
   assert.ok(source.includes(manifest.name), 'client module id must match the package name');
 
   const vm = await import('node:vm');
   new vm.Script(source, { filename: clientFile });
+
+  // Load it the way the web app does: capture the module loader entry, hand the
+  // factory a tiny react stub, then run apply() against a recording ctx. This
+  // catches a registration that names a slot or a section id we did not mean.
+  let loaded;
+  const reactStub = {
+    createElement: (type, props, ...children) => ({ type, props, children }),
+    useState: (value) => [typeof value === 'function' ? value() : value, () => {}],
+    useEffect: () => {},
+    useCallback: (fn) => fn,
+    useRef: (value) => ({ current: value }),
+  };
+  const sandbox = {
+    window: { __ModuleLoader__: { load: (entryPoint) => { loaded = entryPoint; } } },
+    navigator: { language: 'zh-CN' },
+    fetch: async () => ({ ok: true, json: async () => ({ chats: [] }) }),
+    Date,
+    console,
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(source, sandbox, { filename: clientFile });
+  assert.equal(loaded?.id, manifest.name, 'client entry id must be the package name');
+
+  const module = loaded.factory((specifier) => {
+    assert.equal(specifier, 'react', 'the client only requires react');
+    return reactStub;
+  });
+  const registrations = [];
+  const localeDicts = [];
+  const ctx = {
+    effect: (fn) => { fn(); },
+    locale: {
+      bind: () => (key) => key,
+      register: (ns, dict) => { localeDicts.push({ ns, dict }); },
+    },
+    slots: {
+      inject: (name, callback) => { callback(); return name; },
+      register: (options, render) => { registrations.push({ options, render }); return options.name; },
+    },
+  };
+  module.apply(ctx);
+
+  assert.equal(typeof module.name, 'string', 'client exports a name');
+  assert.ok(module.inject.includes('slots'), 'client injects the slot service');
+  const section = registrations.find((entry) => entry.options.name === 'settings.section');
+  assert.ok(section, 'client registers a settings section');
+  assert.equal(section.options.id, 'companion-heartbeat', 'section id is stable');
+  assert.equal(localeDicts.length, 1, 'client registers one dictionary');
+  assert.equal(localeDicts[0].ns, manifest.name);
+  const element = section.render({ t: (key) => key });
+  assert.ok(element && element.type, 'the section renders a React element');
   console.log('ok client entry');
 }
 

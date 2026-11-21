@@ -1,6 +1,6 @@
 {
   "name": "dsh-companion-heartbeat",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Impulse engine for AI companions: tracks needs, decides when the persona wants to speak, and delivers that decision to a host app, a JSON file, or dsh-im.",
   "type": "module",
   "license": "MIT",
