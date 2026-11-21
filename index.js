@@ -48,7 +48,6 @@ export function apply(ctx, rawConfig = {}) {
   if (!fs.existsSync(config.tuningPath)) writeJson(config.tuningPath, config.tuning);
   if (!fs.existsSync(config.statePath)) writeJson(config.statePath, createState());
 
-  const adapter = createAdapter(config);
   const memory = createMemory({ config, bufferPath: config.bufferPath, log });
   const watch = createWatch({ config, log });
   const slots = loadSlots(config.life);
@@ -67,6 +66,14 @@ export function apply(ctx, rawConfig = {}) {
     const state = readJson(config.statePath, null);
     return state && typeof state === 'object' && state.chats ? state : createState();
   };
+
+  // The dsh-im adapter composes and sends by itself, so it needs the live scene
+  // and the session service; the other adapters ignore these.
+  const adapter = createAdapter(config, {
+    ctx,
+    log,
+    life: () => readState().life ?? null,
+  });
 
   // Tuning lives in a file so it can be changed without restarting the plugin.
   const currentTuning = () => {

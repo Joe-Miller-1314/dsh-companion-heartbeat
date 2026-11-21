@@ -14,6 +14,7 @@ import { readActivity } from '../lib/activity.js';
 import { createAdapter } from '../lib/adapters.js';
 import { TUNING_DEFAULTS, resolveConfig } from '../lib/config.js';
 import { createState, tick } from '../lib/engine.js';
+import { cleanReply, composeTemplate, send } from '../lib/deliver.js';
 import { NOW_START, pickLife, writeLife } from '../lib/life.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -232,6 +233,75 @@ const at = (hour, minute = 0) => new Date(2026, 0, 5, hour, minute, 0).getTime()
   assert.ok(proactive.chats.demo, 'adapter output must contain the chat');
   assert.ok(['speak', 'follow', 'quiet'].includes(proactive.chats.demo.decision));
   console.log('ok integration');
+}
+
+// ------------------------------------------------------------ dsh-im sink ---
+{
+  assert.equal(composeTemplate('{tag}: {life}', { tag: 'calm', life: ' boiling water ' }), 'calm: boiling water');
+  assert.equal(composeTemplate('{unknown}', {}), '{unknown}');
+  assert.equal(cleanReply('```\n"好，我在。"\n```', 100), '好，我在。');
+  assert.equal(cleanReply('I was going to say something much longer than allowed', 20), 'I was going to say');
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hb-dshim-'));
+  const config = resolveConfig({
+    dataDir: dir,
+    tickSeconds: 1,
+    adapter: {
+      type: 'dshim',
+      baseUrl: 'http://127.0.0.1:59999/',
+      botId: 'bot_test',
+      format: 'markdown',
+      minGapMinutes: 30,
+      targets: { 'wechat:private:7': 'release-alerts' },
+      compose: { mode: 'template', template: '{life}' },
+    },
+  });
+  assert.equal(config.adapter.baseUrl, 'http://127.0.0.1:59999');
+  assert.equal(config.adapter.format, 'markdown');
+  assert.equal(config.adapter.compose.maxChars, 120);
+
+  const calls = [];
+  const fakeFetch = async (url, init) => {
+    calls.push({ url, body: JSON.parse(init.body) });
+    return { ok: true, status: 200, text: async () => '{"sent":true}' };
+  };
+  const adapter = createAdapter(config, {
+    log: () => {},
+    life: () => ({ tag: 'late', text: 'lights already off' }),
+    fetch: fakeFetch,
+  });
+
+  assert.deepEqual(adapter.keys(), ['wechat:private:7']);
+
+  const plans = { 'wechat:private:7': { interval: 2, speaking: true } };
+  const first = await adapter.apply(plans, { 'wechat:private:7': { speak: true } });
+  assert.deepEqual(first, { ok: true, sent: 1, skipped: 0 });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, 'http://127.0.0.1:59999/api/dsh-im/delivery/messages');
+  assert.deepEqual(calls[0].body, {
+    botId: 'bot_test',
+    targetId: 'release-alerts',
+    text: 'lights already off',
+    format: 'markdown',
+  });
+
+  // Quiet decisions never send, and the adapter-side gap stops a second send
+  // even though the plan still says "speaking".
+  await adapter.apply(plans, { 'wechat:private:7': { speak: false } });
+  const third = await adapter.apply(plans, { 'wechat:private:7': { speak: true } });
+  assert.deepEqual(third, { ok: true, sent: 0, skipped: 1 });
+  assert.equal(calls.length, 1);
+
+  const saved = JSON.parse(fs.readFileSync(path.join(dir, 'dshim-delivery.json'), 'utf8'));
+  assert.ok(saved.sentAt['wechat:private:7'] > 0);
+
+  // A rejected delivery must surface its code and release the claimed slot.
+  const rejecting = async () => ({ ok: false, status: 400, text: async () => '{"error":{"code":"target-not-found"}}' });
+  await assert.rejects(
+    () => send({ baseUrl: 'http://127.0.0.1:59999', botId: 'b', targetId: 't', text: 'x', fetchImpl: rejecting }),
+    /target-not-found/,
+  );
+  console.log('ok dsh-im sink');
 }
 
 // ------------------------------------------------------------ client half ---

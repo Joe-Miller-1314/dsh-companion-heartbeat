@@ -133,6 +133,36 @@ Chat keys may also be typed in by hand (`wechat:private:<id>`, `wechat:group:<id
 | `json` (default) | Writes `{ updatedAt, chats: { key: { allowed, intervalMinutes, decision } } }` to `adapter.path`. Good for any app, and for trying the plugin without a host app. |
 | `wechatagent` | Updates only the `wechat.proactive` block of a chat host config (`enabled`, `intervalMinutes`, `idleMinutes`, `jitterMinutes`, `startTime`, `endTime`, `mode`, per-chat allow list). Every other key in that file is left untouched. Keys come from `chats`, or from `wechat.whitelist.private/groups` when `chats` is empty. |
 | `module` | `adapter.module` points at a JS file exporting `apply(plans, decisions, options)`. |
+| `dshim` | Sends the message itself through [@xmanrui/dsh-im](https://github.com/xmanrui/dsh-im): the plugin writes one short line and POSTs it to the host's `/api/dsh-im/delivery/messages`. |
+
+### Delivering through dsh-im
+
+`dsh-im` is a delivery pipe, so with this adapter the heartbeat no longer only writes a policy — it composes the line and hands it over. Map a chat key to a dsh-im target id:
+
+```yaml
+adapter:
+  type: dshim
+  baseUrl: http://127.0.0.1:3080      # the DSH host web server
+  botId: bot_9577c8572d454122a4ef7fb4d8420a91
+  targets:
+    wechat:private:165338666: release-alerts
+  format: plain                        # or markdown
+  minGapMinutes: 30                    # adapter-side floor against spam
+  compose:
+    mode: session                      # session = let the model write it
+    sessionId: heartbeat-delivery
+    maxChars: 120
+```
+
+With `compose.mode: template` no model call happens; the text is a template with `{life}`, `{tag}`, `{persona}` and `{chat}`:
+
+```yaml
+  compose:
+    mode: template
+    template: "{life}"
+```
+
+In `session` mode the plugin asks `sessionController` for one short, in-character line, using `persona` (or the first lines of `rolePath`) and the current life scene as context. If that service is missing, it logs `sessionController unavailable` and falls back to the template. Either way a delivery only happens when the engine decides `speak`, and never twice for the same chat within `minGapMinutes`; the last send times live in `<dataDir>/dshim-delivery.json`.
 
 ## Data files
 
@@ -145,6 +175,7 @@ Chat keys may also be typed in by hand (`wechat:private:<id>`, `wechat:group:<id
   consolidate.json    last memory pass
   watch.json          seen videos
   proactive.json      json adapter output
+  dshim-delivery.json dshim adapter: last send time per chat
   memory/
     memories.json
     self-narrative.md

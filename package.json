@@ -1,7 +1,7 @@
 {
   "name": "dsh-companion-heartbeat",
-  "version": "1.3.0",
-  "description": "Impulse engine for AI companions: tracks needs, decides when the persona wants to speak, and hands that decision to a host app or a JSON file.",
+  "version": "1.4.0",
+  "description": "Impulse engine for AI companions: tracks needs, decides when the persona wants to speak, and delivers that decision to a host app, a JSON file, or dsh-im.",
   "type": "module",
   "license": "MIT",
   "author": "Joe-Miller-1314",
@@ -47,6 +47,7 @@
     "deepseek-harness",
     "ai-companion",
     "proactive",
-    "scheduler"
+    "scheduler",
+    "dsh-im"
   ]
 }

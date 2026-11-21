@@ -4,6 +4,17 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-11-21
+
+### Added
+
+- `dshim` adapter: delivers the decision through
+  [@xmanrui/dsh-im](https://github.com/xmanrui/dsh-im). The plugin composes one
+  short line (`session` mode asks the session service, `template` mode fills a
+  string) and POSTs it to the host's `/api/dsh-im/delivery/messages`, with an
+  adapter-side `minGapMinutes` floor and send times persisted to
+  `dshim-delivery.json`.
+
 ## [1.3.0] - 2026-11-21
 
 ### Added
